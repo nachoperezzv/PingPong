@@ -68,15 +68,36 @@ class Game:
 		game_active = False
 
 		while not exit:	
-			for event in pygame.event.get():				
+			for event in pygame.event.get():
+
 				if event.type == pygame.QUIT:
 					exit = True
-				if event.type == pygame.KEYUP:
-					game_active = True
-					
+
+			keys = pygame.key.get_pressed()		
+
+			if keys[pygame.K_SPACE]:
+				game_active = True
+			
+			if keys[pygame.K_ESCAPE]:
+				game_active = False
+			
+			if keys[pygame.K_UP]:
+				self.player.movement = -1
+
+			if keys[pygame.K_DOWN]:
+				self.player.movement = 1
+						
+			if keys[pygame.K_UP]==False and keys[pygame.K_DOWN]==False:
+				self.player.movement = 0
 			
 			if game_active:
 				self.display_score()
+
+				self.blocks_group.draw(self.screen)
+				self.ball_group.draw(self.screen)
+
+				self.blocks_group.update(self.ball_group)
+				self.ball_group.update()
 			else:
 				self.display_init()
 
