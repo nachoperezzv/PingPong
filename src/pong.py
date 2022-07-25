@@ -1,4 +1,4 @@
-import os 
+import random
 import sys
 import pygame 
 
@@ -10,11 +10,12 @@ class Block(pygame.sprite.Sprite):
 
 
 class Player(Block):
-	def __init__(self,path,init_pos,speed=3):
+	def __init__(self,path,init_pos,speed=3,timer=None):
 		super().__init__(path,init_pos)
 
 		self.speed = speed
 		self.movement = 0
+
 	
 	def move(self):
 		self.rect.y += self.speed*self.movement
@@ -26,6 +27,7 @@ class Player(Block):
 			self.rect.bottom = 350
 
 	def update(self,ball_group):
+		
 		self.move()
 		self.boundaries()
 
@@ -36,10 +38,11 @@ class Opponent(Block):
 		self.speed = speed
 	
 	def move(self,ball_group):
-		if ball_group.sprite.rect.center[1] > self.rect.center[1]:
-			self.rect.y += self.speed
-		if ball_group.sprite.rect.center[1] < self.rect.center[1]:
-			self.rect.y -= self.speed
+		if ball_group.sprite.rect.center[0] > 100:
+			if ball_group.sprite.rect.center[1] > self.rect.center[1]:
+				self.rect.y += self.speed
+			if ball_group.sprite.rect.center[1] < self.rect.center[1]:
+				self.rect.y -= self.speed
 
 	def boundaries(self):
 		if self.rect.top <= 0:
@@ -53,19 +56,37 @@ class Opponent(Block):
 
 
 class Ball(Block):
-	def __init__(self,path,init_pos,blocks_group, speed=3.5):
+	def __init__(self,screen, path,init_pos,blocks_group, speed=3):
 		super().__init__(path,init_pos)
+		self.screen = screen
 		self.init_pos = init_pos
 		self.blocks_group = blocks_group
-		self.speed_x = speed
-		self.speed_y = speed
+		
+		self.init_speed = speed
+		self.speed_x = speed * random.choice([1,-1])
+		self.speed_y = speed * random.choice([1,-1])
+
+		self.score_time = 0
+		self._reset_time = 3000
 
 	def reset_ball(self):
 		self.rect = self.image.get_rect(center=(self.init_pos))
+		self.score_time = pygame.time.get_ticks()
+		self.speed_x = self.init_speed * random.choice([1,-1])
+		self.speed_y = self.init_speed * random.choice([1,-1])
 
 	def move(self):
-		self.rect.x += self.speed_x
-		self.rect.y += self.speed_y
+		if pygame.time.get_ticks() - self.score_time > self._reset_time:
+			self.rect.x += self.speed_x
+			self.rect.y += self.speed_y
+		else: 
+			self.display_time()
+	
+	def display_time(self):
+		time_left_text = pygame.font.Font(None,25).render(f'{int((self._reset_time - (pygame.time.get_ticks() - self.score_time))/1000)+1}',True,'white')
+		time_left_rect = time_left_text.get_rect(center=(300,150))
+
+		self.screen.blit(time_left_text,time_left_rect)
 
 	def boundaries(self):
 		if self.rect.top <= 0:
@@ -108,6 +129,12 @@ class Game:
 		# Clock
 		self.clock = pygame.time.Clock()
 
+		# Timers 
+		self.increase_ball_speed = pygame.USEREVENT + 1
+		self.decrease_ball_speed = pygame.USEREVENT + 2
+		pygame.time.set_timer(self.increase_ball_speed,millis=4000)
+		pygame.time.set_timer(self.decrease_ball_speed,millis=12000)
+
 		# Groups 
 		self.blocks_group = pygame.sprite.Group()
 		self.ball_group = pygame.sprite.GroupSingle()
@@ -128,7 +155,8 @@ class Game:
 		self.ball = Ball(
 			path = '../include/icons/ball.png',
 			init_pos = (self._width/2,self._height/2),
-			blocks_group = self.blocks_group
+			blocks_group = self.blocks_group,
+			screen=self.screen
 			)		
 		self.ball_group.add(self.ball)
 
@@ -145,6 +173,12 @@ class Game:
 
 				if event.type == pygame.QUIT:
 					exit = True
+
+				if event.type == self.increase_ball_speed:
+					self.ball.speed_x += random.choice([0.5,1,1.5,2])
+
+				if event.type == self.decrease_ball_speed:
+					self.ball.speed_x += random.choice([-1,-1,-2])
 
 			keys = pygame.key.get_pressed()		
 
@@ -173,9 +207,9 @@ class Game:
 
 				self.blocks_group.update(self.ball_group)
 				self.ball_group.update()
-
 				
 			else:
+				self.ball.reset_ball()
 				self.display_init()
 
 			pygame.display.flip()
@@ -227,9 +261,11 @@ class Game:
 		self.screen.blit(mask,mask_rect)
 
 	def check_ball(self):
-		if self.ball.rect.x < 0:
+		if self.ball.rect.x <= -10:
 			self.score_opponent += 1
+			self.ball.score_time = pygame.time.get_ticks()
 			self.ball.reset_ball()
-		if self.ball.rect.x > self._width:
+		if self.ball.rect.x >= self._width + 10:
 			self.score_player += 1
+			self.ball.score_time = pygame.time.get_ticks()
 			self.ball.reset_ball()
