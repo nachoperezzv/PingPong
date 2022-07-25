@@ -10,49 +10,16 @@ class Block(pygame.sprite.Sprite):
 
 
 class Player(Block):
-	def __init__(self,path,init_pos,speed=2):
+	def __init__(self,path,init_pos):
 		super().__init__(path,init_pos)
-
-		self.speed = speed
-		self.movement = 0
-	
-	def move(self):
-		self.rect.y += self.speed*self.movement
-	
-	def boundaries(self):
-		if self.rect.top < 0:
-			self.rect.top = 0
-		if self.rect.bottom > 350:
-			self.rect.bottom = 350
-
-	def update(self,ball_group):
-		self.move()
-		self.boundaries()
-
 
 class Opponent(Block):
-	def __init__(self,path,init_pos, speed=2):
-		super().__init__(path,init_pos)
-		self.speed = speed
-	
-	def move(self,ball_group):
-		if ball_group.sprite.rect.y > self.rect.top:
-			self.rect.y += self.speed
-		if ball_group.sprite.rect.y < self.rect.bottom:
-			self.rect.y -= self.speed
-
-	def update(self,ball_group):
-		self.move(ball_group)
-
+	def __init_(sef,path,init_pos):
+		super().__init(path,init_pos)
 
 class Ball(Block):
 	def __init__(self,path,init_pos,blocks_group):
 		super().__init__(path,init_pos)
-		self.blocks_group = blocks_group
-		
-	def update(self):
-		pass
-
 
 class Game:
 	def __init__(self):
@@ -75,7 +42,7 @@ class Game:
 		# Objects
 		self.player = Player(
 			path = '../include/icons/paddle.png',
-			init_pos = (10,self._height/2)
+			init_pos = (0,self._height/2)
 			)
 		self.blocks_group.add(self.player)
 
@@ -101,36 +68,15 @@ class Game:
 		game_active = False
 
 		while not exit:	
-			for event in pygame.event.get():
-
+			for event in pygame.event.get():				
 				if event.type == pygame.QUIT:
 					exit = True
-
-			keys = pygame.key.get_pressed()		
-
-			if keys[pygame.K_SPACE]:
-				game_active = True
-			
-			if keys[pygame.K_ESCAPE]:
-				game_active = False
-			
-			if keys[pygame.K_UP]:
-				self.player.movement = -1
-
-			if keys[pygame.K_DOWN]:
-				self.player.movement = 1
-						
-			if keys[pygame.K_UP]==False and keys[pygame.K_DOWN]==False:
-				self.player.movement = 0
+				if event.type == pygame.KEYUP:
+					game_active = True
+					
 			
 			if game_active:
 				self.display_score()
-
-				self.blocks_group.draw(self.screen)
-				self.ball_group.draw(self.screen)
-
-				self.blocks_group.update(self.ball_group)
-				self.ball_group.update()
 			else:
 				self.display_init()
 
@@ -170,8 +116,8 @@ class Game:
 		score1 = pygame.font.Font(None,16).render(f'{self.score_player}', True, 'white')
 		score2 = pygame.font.Font(None,16).render(f'{self.score_opponent}', True, 'white')
 
-		score1_rect = score1.get_rect(center=(self._width/2-10,self._height/2+25))
-		score2_rect = score2.get_rect(center=(self._width/2+10,self._height/2+25))
+		score1_rect = score1.get_rect(center=(self._width/2-10,self._height/2))
+		score2_rect = score2.get_rect(center=(self._width/2+10,self._height/2))
 
 		self.screen.blit(score1,score1_rect)
 		self.screen.blit(score2,score2_rect)
