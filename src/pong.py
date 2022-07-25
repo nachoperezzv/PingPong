@@ -10,7 +10,7 @@ class Block(pygame.sprite.Sprite):
 
 
 class Player(Block):
-	def __init__(self,path,init_pos,speed=2):
+	def __init__(self,path,init_pos,speed=3):
 		super().__init__(path,init_pos)
 
 		self.speed = speed
@@ -31,28 +31,68 @@ class Player(Block):
 
 
 class Opponent(Block):
-	def __init__(self,path,init_pos, speed=2):
+	def __init__(self,path,init_pos, speed=3):
 		super().__init__(path,init_pos)
 		self.speed = speed
 	
 	def move(self,ball_group):
-		if ball_group.sprite.rect.y > self.rect.top:
+		if ball_group.sprite.rect.center[1] > self.rect.center[1]:
 			self.rect.y += self.speed
-		if ball_group.sprite.rect.y < self.rect.bottom:
+		if ball_group.sprite.rect.center[1] < self.rect.center[1]:
 			self.rect.y -= self.speed
+
+	def boundaries(self):
+		if self.rect.top <= 0:
+			self.rect.top = 0
+		if self.rect.bottom >= 350:
+			self.rect.bottom = 350
 
 	def update(self,ball_group):
 		self.move(ball_group)
+		self.boundaries()
 
 
 class Ball(Block):
-	def __init__(self,path,init_pos,blocks_group):
+	def __init__(self,path,init_pos,blocks_group, speed=3.5):
 		super().__init__(path,init_pos)
+		self.init_pos = init_pos
 		self.blocks_group = blocks_group
+		self.speed_x = speed
+		self.speed_y = speed
+
+	def reset_ball(self):
+		self.rect = self.image.get_rect(center=(self.init_pos))
+
+	def move(self):
+		self.rect.x += self.speed_x
+		self.rect.y += self.speed_y
+
+	def boundaries(self):
+		if self.rect.top <= 0:
+			self.speed_y = -self.speed_y
+		if self.rect.bottom >= 350:
+			self.speed_y = -self.speed_y
+
+	def collision(self):
+		if (bool(pygame.sprite.spritecollide(self,self.blocks_group,False))):
+			collision_block_rect = pygame.sprite.spritecollide(self,self.blocks_group,False)[0].rect
+
+			if abs(self.rect.right - collision_block_rect.left) < 10 and self.speed_x > 0:
+				self.speed_x = -self.speed_x
+			if abs(self.rect.left - collision_block_rect.right) < 10 and self.speed_x < 0:
+				self.speed_x = -self.speed_x
+			if abs(self.rect.top - collision_block_rect.bottom) < 10 and self.speed_y < 0:
+				self.rect.top = collision_block_rect.bottom
+				self.speed_y = -self.speed_y
+			if abs(self.rect.bottom - collision_block_rect.top) < 10 and self.speed_y > 0:
+				self.rect.bottom = collision_block_rect.top
+				self.speed_y = -self.speed_y		
+
 		
 	def update(self):
-		pass
-
+		self.boundaries()
+		self.move()
+		self.collision()
 
 class Game:
 	def __init__(self):
@@ -126,11 +166,15 @@ class Game:
 			if game_active:
 				self.display_score()
 
+				self.check_ball()
+
 				self.blocks_group.draw(self.screen)
 				self.ball_group.draw(self.screen)
 
 				self.blocks_group.update(self.ball_group)
 				self.ball_group.update()
+
+				
 			else:
 				self.display_init()
 
@@ -181,4 +225,11 @@ class Game:
 		mask.fill([75,75,75,150])
 		
 		self.screen.blit(mask,mask_rect)
-	
+
+	def check_ball(self):
+		if self.ball.rect.x < 0:
+			self.score_opponent += 1
+			self.ball.reset_ball()
+		if self.ball.rect.x > self._width:
+			self.score_player += 1
+			self.ball.reset_ball()
