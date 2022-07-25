@@ -10,16 +10,49 @@ class Block(pygame.sprite.Sprite):
 
 
 class Player(Block):
-	def __init__(self,path,init_pos):
+	def __init__(self,path,init_pos,speed=2):
 		super().__init__(path,init_pos)
 
+		self.speed = speed
+		self.movement = 0
+	
+	def move(self):
+		self.rect.y += self.speed*self.movement
+	
+	def boundaries(self):
+		if self.rect.top < 0:
+			self.rect.top = 0
+		if self.rect.bottom > 350:
+			self.rect.bottom = 350
+
+	def update(self,ball_group):
+		self.move()
+		self.boundaries()
+
+
 class Opponent(Block):
-	def __init_(sef,path,init_pos):
-		super().__init(path,init_pos)
+	def __init__(self,path,init_pos, speed=2):
+		super().__init__(path,init_pos)
+		self.speed = speed
+	
+	def move(self,ball_group):
+		if ball_group.sprite.rect.y > self.rect.top:
+			self.rect.y += self.speed
+		if ball_group.sprite.rect.y < self.rect.bottom:
+			self.rect.y -= self.speed
+
+	def update(self,ball_group):
+		self.move(ball_group)
+
 
 class Ball(Block):
 	def __init__(self,path,init_pos,blocks_group):
 		super().__init__(path,init_pos)
+		self.blocks_group = blocks_group
+		
+	def update(self):
+		pass
+
 
 class Game:
 	def __init__(self):
@@ -42,7 +75,7 @@ class Game:
 		# Objects
 		self.player = Player(
 			path = '../include/icons/paddle.png',
-			init_pos = (0,self._height/2)
+			init_pos = (10,self._height/2)
 			)
 		self.blocks_group.add(self.player)
 
@@ -117,7 +150,7 @@ class Game:
 
 		self.screen.blit(mask,mask_rect)
 
-		init = pygame.font.Font(None,36).render("Pulsa ENTER para comenzar", True, 'white')
+		init = pygame.font.Font(None,36).render("Pulsa ESPACIO para comenzar", True, 'white')
 		init_rect = init.get_rect(center=(self._width/2,self._height/2))
 
 		self.screen.blit(init,init_rect)
@@ -137,8 +170,8 @@ class Game:
 		score1 = pygame.font.Font(None,16).render(f'{self.score_player}', True, 'white')
 		score2 = pygame.font.Font(None,16).render(f'{self.score_opponent}', True, 'white')
 
-		score1_rect = score1.get_rect(center=(self._width/2-10,self._height/2))
-		score2_rect = score2.get_rect(center=(self._width/2+10,self._height/2))
+		score1_rect = score1.get_rect(center=(self._width/2-10,self._height/2+25))
+		score2_rect = score2.get_rect(center=(self._width/2+10,self._height/2+25))
 
 		self.screen.blit(score1,score1_rect)
 		self.screen.blit(score2,score2_rect)

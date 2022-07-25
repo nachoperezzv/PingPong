@@ -3,5 +3,5 @@
 **/Scripts
 **/__pycache__
 
-*.pyc 
+*/__pycache__/*.pyc 
 *.cfg
