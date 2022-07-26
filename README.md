@@ -10,6 +10,12 @@ Tras pulsar `SPACE` debería de acceder a la pantalla de juego, donde tiene 3 se
 
 ![Pantalla de juego - carga](include/icons/play.png)
 
+## Índice
+1. [Índice](#Índice)
+2. [Descargar](#Descargar)
+3. [Compilar](#Compilar)
+4. [Jugador](#Jugador)
+
 ## Descargar
 
 1. Clone el repositorio desde su bash en la ubicación en la que desea tenerlo:
