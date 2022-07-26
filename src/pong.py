@@ -69,15 +69,22 @@ class Ball(Block):
 		self.score_time = 0
 		self._reset_time = 3000
 
+		self.num_of_collisions = 0
+		self.increment = 0
+
 	def reset_ball(self):
 		self.rect = self.image.get_rect(center=(self.init_pos))
 		self.score_time = pygame.time.get_ticks()
+
 		self.speed_x = self.init_speed * random.choice([1,-1])
 		self.speed_y = self.init_speed * random.choice([1,-1])
 
+		self.num_of_collisions = 0
+		self.increment = 0
+
 	def move(self):
 		if pygame.time.get_ticks() - self.score_time > self._reset_time:
-			self.rect.x += self.speed_x
+			self.rect.x += (self.speed_x+self.increment)
 			self.rect.y += self.speed_y
 		else: 
 			self.display_time()
@@ -97,6 +104,9 @@ class Ball(Block):
 	def collision(self):
 		if (bool(pygame.sprite.spritecollide(self,self.blocks_group,False))):
 			collision_block_rect = pygame.sprite.spritecollide(self,self.blocks_group,False)[0].rect
+
+			self.num_of_collisions += 1
+			self.increment = self.num_of_collisions//7
 
 			if abs(self.rect.right - collision_block_rect.left) < 10 and self.speed_x > 0:
 				self.speed_x = -self.speed_x
@@ -128,12 +138,6 @@ class Game:
 		
 		# Clock
 		self.clock = pygame.time.Clock()
-
-		# Timers 
-		self.increase_ball_speed = pygame.USEREVENT + 1
-		self.decrease_ball_speed = pygame.USEREVENT + 2
-		pygame.time.set_timer(self.increase_ball_speed,millis=4000)
-		pygame.time.set_timer(self.decrease_ball_speed,millis=12000)
 
 		# Groups 
 		self.blocks_group = pygame.sprite.Group()
@@ -173,12 +177,6 @@ class Game:
 
 				if event.type == pygame.QUIT:
 					exit = True
-
-				if event.type == self.increase_ball_speed:
-					self.ball.speed_x += random.choice([0.5,1,1.5,2])
-
-				if event.type == self.decrease_ball_speed:
-					self.ball.speed_x += random.choice([-1,-1,-2])
 
 			keys = pygame.key.get_pressed()		
 
