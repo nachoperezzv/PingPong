@@ -72,6 +72,8 @@ class Ball(Block):
 		self.num_of_collisions = 0
 		self.increment = 0
 
+		self.pong_sound = pygame.mixer.Sound('../include/sound/pong.ogg')
+
 	def reset_ball(self):
 		self.rect = self.image.get_rect(center=(self.init_pos))
 		self.score_time = pygame.time.get_ticks()
@@ -108,6 +110,8 @@ class Ball(Block):
 			self.num_of_collisions += 1
 			self.increment = self.num_of_collisions//7
 
+			self.pong_sound.play()
+
 			if abs(self.rect.right - collision_block_rect.left) < 10 and self.speed_x > 0:
 				self.speed_x = -self.speed_x
 			if abs(self.rect.left - collision_block_rect.right) < 10 and self.speed_x < 0:
@@ -138,6 +142,9 @@ class Game:
 		
 		# Clock
 		self.clock = pygame.time.Clock()
+
+		# Music
+		self.score_sound = pygame.mixer.Sound('../include/sound/score.ogg')
 
 		# Groups 
 		self.blocks_group = pygame.sprite.Group()
@@ -262,8 +269,10 @@ class Game:
 		if self.ball.rect.x <= -10:
 			self.score_opponent += 1
 			self.ball.score_time = pygame.time.get_ticks()
+			self.score_sound.play()
 			self.ball.reset_ball()
 		if self.ball.rect.x >= self._width + 10:
 			self.score_player += 1
 			self.ball.score_time = pygame.time.get_ticks()
+			self.score_sound.play()
 			self.ball.reset_ball()
