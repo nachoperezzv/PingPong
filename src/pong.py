@@ -1,6 +1,8 @@
 import random
 import sys
 import pygame 
+import os
+
 
 class Block(pygame.sprite.Sprite):
 	def __init__(self,path,init_pos):
@@ -16,7 +18,6 @@ class Player(Block):
 		self.speed = speed
 		self.movement = 0
 
-	
 	def move(self):
 		self.rect.y += self.speed*self.movement
 	
@@ -26,8 +27,7 @@ class Player(Block):
 		if self.rect.bottom > 350:
 			self.rect.bottom = 350
 
-	def update(self,ball_group):
-		
+	def update(self,ball_group):		
 		self.move()
 		self.boundaries()
 
@@ -56,7 +56,7 @@ class Opponent(Block):
 
 
 class Ball(Block):
-	def __init__(self,screen, path,init_pos,blocks_group, speed=3):
+	def __init__(self,screen, path,init_pos,blocks_group, speed=3.5):
 		super().__init__(path,init_pos)
 		self.screen = screen
 		self.init_pos = init_pos
@@ -122,12 +122,12 @@ class Ball(Block):
 			if abs(self.rect.bottom - collision_block_rect.top) < 10 and self.speed_y > 0:
 				self.rect.bottom = collision_block_rect.top
 				self.speed_y = -self.speed_y		
-
-		
+	
 	def update(self):
 		self.boundaries()
 		self.move()
 		self.collision()
+
 
 class Game:
 	def __init__(self):
