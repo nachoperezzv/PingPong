@@ -14,18 +14,18 @@ Tras pulsar `SPACE` debería de acceder a la pantalla de juego, donde tiene 3 se
 
 1. Clone el repositorio desde su bash en la ubicación en la que desea tenerlo:
 ```
-> git clone https://github.com/nachoperezzv/PingPong.git
+git clone https://github.com/nachoperezzv/PingPong.git
 ```
 
 2. Cree el entorno virtual de python para no modificar sus bibliotecas personales y asegurarse de que se descarga la versión correcta de **pygame**. Puede hacerlo de la siguiente forma , estando en la misma ubicación que en el paso anterior:
 
 ```
-> python -m venv PingPong
+python -m venv PingPong
 ```
 
 3. Acceda a la carpeta:
 ```
-> cd PingPong
+cd PingPong
 ```
 
 4. Deberá activar su entorno virtual. Por convención, con `venv` debería de disponer de un directorio de nombre `Scripts`. Acceda a el y luego ejecute el siguiente comando. 
